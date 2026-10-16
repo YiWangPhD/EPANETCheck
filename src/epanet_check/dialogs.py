@@ -7,8 +7,9 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QSignalBlocker, Qt
 from PyQt6.QtWidgets import (
+    QAbstractSpinBox,
     QAbstractItemView,
     QComboBox,
     QDialog,
@@ -49,6 +50,7 @@ class PerformanceCriteriaDialog(QDialog):
         self.criteria: list[dict[str, Any]] = []
         self.current_path: Path | None = None
         self.asset_ids: dict[str, list[str]] = {"junction": [], "tank": []}
+        self._updating_editor = False
 
         layout = QVBoxLayout(self)
         file_row = QHBoxLayout()
@@ -63,7 +65,7 @@ class PerformanceCriteriaDialog(QDialog):
         file_row.addWidget(save_button)
         layout.addLayout(file_row)
 
-        editor = QGroupBox("Add criterion")
+        editor = QGroupBox("Edit selected criterion or add a new criterion")
         form = QGridLayout(editor)
         self.type_combo = QComboBox()
         self.type_combo.addItem("Junction", "junction")
@@ -110,10 +112,13 @@ class PerformanceCriteriaDialog(QDialog):
         layout.addWidget(self.table, 1)
 
         buttons = QHBoxLayout()
+        new_button = QPushButton("New Criterion")
+        new_button.clicked.connect(self.table.clearSelection)
         remove_button = QPushButton("Remove Selected")
         remove_button.clicked.connect(self.remove_selected)
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.accept)
+        buttons.addWidget(new_button)
         buttons.addWidget(remove_button)
         buttons.addStretch()
         buttons.addWidget(close_button)
@@ -122,12 +127,21 @@ class PerformanceCriteriaDialog(QDialog):
         self.type_combo.currentIndexChanged.connect(self._update_type)
         self.metric_combo.currentIndexChanged.connect(self._update_units)
         self._update_type()
+        self.table.itemSelectionChanged.connect(self._selection_changed)
+        self.id_combo.currentTextChanged.connect(self._update_selected)
+        self.unit_combo.currentIndexChanged.connect(self._update_selected)
+        self.bound_combo.currentIndexChanged.connect(self._update_selected)
+        self.limit_spin.valueChanged.connect(self._update_selected)
+        self.set_data(_read_json(Path(__file__).parent / "defaults" / "performance_criteria.json"))
+        self.path_label.setText("Default performance criteria (save a copy to keep edits)")
 
     def set_assets(self, junctions: list[str], tanks: list[str]) -> None:
         self.asset_ids = {"junction": junctions, "tank": tanks}
         self._update_ids()
 
     def _update_type(self) -> None:
+        updating = self._updating_editor
+        self._updating_editor = True
         asset_type = self.type_combo.currentData()
         self.metric_combo.blockSignals(True)
         self.metric_combo.clear()
@@ -140,8 +154,11 @@ class PerformanceCriteriaDialog(QDialog):
         self.metric_combo.blockSignals(False)
         self._update_ids()
         self._update_units()
+        self._updating_editor = updating
+        self._update_selected()
 
     def _update_ids(self) -> None:
+        blocker = QSignalBlocker(self.id_combo)
         current = self.id_combo.currentText()
         self.id_combo.clear()
         self.id_combo.addItems(self.asset_ids.get(self.type_combo.currentData(), []))
@@ -149,6 +166,7 @@ class PerformanceCriteriaDialog(QDialog):
             self.id_combo.setCurrentText(current)
 
     def _update_units(self) -> None:
+        blocker = QSignalBlocker(self.unit_combo)
         metric = self.metric_combo.currentData()
         self.unit_combo.clear()
         if metric == "pressure":
@@ -158,6 +176,47 @@ class PerformanceCriteriaDialog(QDialog):
         else:
             self.unit_combo.addItem("ft", "ft")
             self.unit_combo.addItem("m", "m")
+        del blocker
+        self._update_selected()
+
+    def _selected_row(self) -> int | None:
+        rows = {index.row() for index in self.table.selectedIndexes()}
+        return next(iter(rows)) if len(rows) == 1 else None
+
+    def _selection_changed(self) -> None:
+        row = self._selected_row()
+        if row is None:
+            return
+        item = self.criteria[row]
+        self._updating_editor = True
+        try:
+            self.type_combo.setCurrentIndex(self.type_combo.findData(item["asset_type"]))
+            self.id_combo.setCurrentText(item["asset_id"])
+            self.metric_combo.setCurrentIndex(self.metric_combo.findData(item["metric"]))
+            self.unit_combo.setCurrentIndex(self.unit_combo.findData(item["unit"]))
+            bound = "min" if "min" in item else "max"
+            self.bound_combo.setCurrentIndex(self.bound_combo.findData(bound))
+            self.limit_spin.setValue(item[bound])
+        finally:
+            self._updating_editor = False
+
+    def _editor_item(self) -> dict[str, Any]:
+        return {
+            "asset_type": self.type_combo.currentData(),
+            "asset_id": self.id_combo.currentText().strip(),
+            "metric": self.metric_combo.currentData(),
+            "unit": self.unit_combo.currentData(),
+            self.bound_combo.currentData(): self.limit_spin.value(),
+        }
+
+    def _update_selected(self) -> None:
+        if self._updating_editor:
+            return
+        row = self._selected_row()
+        if row is None:
+            return
+        self.criteria[row] = self._editor_item()
+        self._render_row(row)
 
     def add_criterion(self) -> None:
         asset_id = self.id_combo.currentText().strip()
@@ -168,13 +227,7 @@ class PerformanceCriteriaDialog(QDialog):
         if asset_id not in self.asset_ids.get(asset_type, []):
             QMessageBox.warning(self, "Unknown asset", "The selected ID is not present in the model.")
             return
-        item = {
-            "asset_type": asset_type,
-            "asset_id": asset_id,
-            "metric": self.metric_combo.currentData(),
-            "unit": self.unit_combo.currentData(),
-            self.bound_combo.currentData(): self.limit_spin.value(),
-        }
+        item = self._editor_item()
         self.criteria.append(item)
         self._refresh()
 
@@ -185,20 +238,26 @@ class PerformanceCriteriaDialog(QDialog):
         self._refresh()
 
     def _refresh(self) -> None:
+        blocker = QSignalBlocker(self.table)
+        self.table.clearSelection()
         self.table.setRowCount(len(self.criteria))
+        for row in range(len(self.criteria)):
+            self._render_row(row)
+
+    def _render_row(self, row: int) -> None:
+        item = self.criteria[row]
         metric_names = {"head": "Hydraulic head", "pressure": "Pressure", "level": "Water level"}
-        for row, item in enumerate(self.criteria):
-            bound = "min" if "min" in item else "max"
-            values = [
-                str(item.get("asset_type", "")).title(),
-                str(item.get("asset_id", "")),
-                metric_names.get(str(item.get("metric", "")), str(item.get("metric", ""))),
-                bound.title(),
-                f"{float(item[bound]):g}",
-                str(item.get("unit", "")),
-            ]
-            for column, value in enumerate(values):
-                self.table.setItem(row, column, QTableWidgetItem(value))
+        bound = "min" if "min" in item else "max"
+        values = [
+            str(item.get("asset_type", "")).title(),
+            str(item.get("asset_id", "")),
+            metric_names.get(str(item.get("metric", "")), str(item.get("metric", ""))),
+            bound.title(),
+            f"{float(item[bound]):g}",
+            str(item.get("unit", "")),
+        ]
+        for column, value in enumerate(values):
+            self.table.setItem(row, column, QTableWidgetItem(value))
 
     def set_data(self, value: dict[str, Any], path: Path | None = None) -> None:
         criteria = value.get("criteria")
@@ -290,15 +349,16 @@ class GlobalLimitsDialog(QDialog):
         file_row.addWidget(save_button)
         layout.addLayout(file_row)
 
-        groups_row = QHBoxLayout()
+        groups_grid = QGridLayout()
         categories = ["Junction", "Pipe", "Pump", "Tank", "Valve"]
-        for category in categories:
+        for index, category in enumerate(categories):
             group = QGroupBox(category)
             form = QFormLayout(group)
             for cat, label, key, subkey, unit, default in self.FIELD_DEFINITIONS:
                 if cat != category:
                     continue
                 spin = QDoubleSpinBox()
+                spin.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
                 spin.setRange(-1_000_000_000, 1_000_000_000)
                 spin.setDecimals(4)
                 spin.setValue(default)
@@ -308,8 +368,12 @@ class GlobalLimitsDialog(QDialog):
                 if unit:
                     row.addWidget(QLabel(unit))
                 form.addRow(label, row)
-            groups_row.addWidget(group)
-        layout.addLayout(groups_row, 1)
+            group.setFixedHeight(max(170, group.sizeHint().height()))
+            groups_grid.addWidget(group, index // 3, index % 3, Qt.AlignmentFlag.AlignTop)
+        for column in range(3):
+            groups_grid.setColumnStretch(column, 1)
+        layout.addLayout(groups_grid)
+        layout.addStretch()
 
         buttons = QHBoxLayout()
         buttons.addStretch()

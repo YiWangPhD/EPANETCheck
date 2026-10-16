@@ -1,0 +1,501 @@
+{
+  "criteria": [
+    {
+      "asset_type": "junction",
+      "asset_id": "44AM-1020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 560.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "BRM4-1074",
+      "metric": "head",
+      "unit": "ft",
+      "min": 650.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "BRM5-1150",
+      "metric": "head",
+      "unit": "ft",
+      "min": 650.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "CLM-1120",
+      "metric": "head",
+      "unit": "ft",
+      "min": 345.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "CPM-1150",
+      "metric": "head",
+      "unit": "ft",
+      "min": 642.6
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "HM2-1380",
+      "metric": "head",
+      "unit": "ft",
+      "min": 260.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "HM3-1360",
+      "metric": "head",
+      "unit": "ft",
+      "min": 260.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "LMPS-690",
+      "metric": "head",
+      "unit": "ft",
+      "max": 600.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "LMPS-790",
+      "metric": "head",
+      "unit": "ft",
+      "max": 600.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "SDM1-1194",
+      "metric": "head",
+      "unit": "ft",
+      "min": 208.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "SODM3-1510",
+      "metric": "head",
+      "unit": "ft",
+      "min": 300.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "W16TPT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 510.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "W230PT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 366.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "W25HPT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 524.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "W36APT-021",
+      "metric": "head",
+      "unit": "ft",
+      "min": 338.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "W45BPT-040",
+      "metric": "head",
+      "unit": "ft",
+      "min": 605.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WBMTPT-040",
+      "metric": "head",
+      "unit": "ft",
+      "min": 538.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WBMTPT-040",
+      "metric": "head",
+      "unit": "ft",
+      "max": 656.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WCV2PT-064",
+      "metric": "head",
+      "unit": "ft",
+      "min": 537.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WESLPT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 620.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WGPL-PI-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 485.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WOSSPT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 300.0
+    },
+    {
+      "asset_type": "junction",
+      "asset_id": "WRMRPT-020",
+      "metric": "head",
+      "unit": "ft",
+      "min": 260.0
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "BMR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 528.06
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "BMR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 535.61
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CHR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 414.48
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CHR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 419.4
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CPR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 505.12
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CPR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 513.32
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CLR2-1",
+      "metric": "head",
+      "unit": "ft",
+      "min": 368.39
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CLR2-1",
+      "metric": "head",
+      "unit": "ft",
+      "max": 380.53
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CLR2-2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 368.39
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "CLR2-2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 380.53
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "GPR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 678.45
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "GPR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 683.7
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "GRR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 451.93
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "GRR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 461.78
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "HT",
+      "metric": "head",
+      "unit": "ft",
+      "min": 451.48
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "HT",
+      "metric": "head",
+      "unit": "ft",
+      "max": 469.53
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KPR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 418.0
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KPR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 426.21
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KRS-1",
+      "metric": "head",
+      "unit": "ft",
+      "min": 434.82
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KRS-1",
+      "metric": "head",
+      "unit": "ft",
+      "max": 439.74
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KRS-2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 434.82
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "KRS-2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 439.74
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "LMR-1",
+      "metric": "head",
+      "unit": "ft",
+      "min": 490.97
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "LMR-1",
+      "metric": "head",
+      "unit": "ft",
+      "max": 496.88
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "LMR-2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 489.99
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "LMR-2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 495.9
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "MRR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 397.7
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "MRR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 404.27
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "NR-1",
+      "metric": "head",
+      "unit": "ft",
+      "min": 426.66
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "NR-1",
+      "metric": "head",
+      "unit": "ft",
+      "max": 434.21
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "NR-2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 426.66
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "NR-2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 434.21
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "PHR-1&2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 267.85
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "PHR-1&2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 271.13
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "PHR-3",
+      "metric": "head",
+      "unit": "ft",
+      "min": 265.09
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "PHR-3",
+      "metric": "head",
+      "unit": "ft",
+      "max": 267.39
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SAR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 400.84
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SAR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 406.09
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SR-1",
+      "metric": "head",
+      "unit": "ft",
+      "min": 480.79
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SR-1",
+      "metric": "head",
+      "unit": "ft",
+      "max": 483.09
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SR-2",
+      "metric": "head",
+      "unit": "ft",
+      "min": 477.51
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "SR-2",
+      "metric": "head",
+      "unit": "ft",
+      "max": 483.09
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "VHR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 431.48
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "VHR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 438.04
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "WER",
+      "metric": "head",
+      "unit": "ft",
+      "min": 493.91
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "WER",
+      "metric": "head",
+      "unit": "ft",
+      "max": 502.12
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "WHR",
+      "metric": "head",
+      "unit": "ft",
+      "min": 444.98
+    },
+    {
+      "asset_type": "tank",
+      "asset_id": "WHR",
+      "metric": "head",
+      "unit": "ft",
+      "max": 449.58
+    }
+  ]
+}

@@ -33,6 +33,13 @@ The main window loads and saves `run_config.json`. Performance criteria and
 global limits are loaded and saved inside their respective dialogs. Loading a
 run configuration automatically loads both referenced supporting files.
 
+The GUI starts with 71 performance checks from the supplied pressure checklist,
+bundled as `epanet_check/defaults/performance_criteria.json`. Select a table row
+in Performance Criteria to edit it; changes in the fields above update that row
+immediately. Click New Criterion to clear the selection before adding a separate
+check. Save JSON to keep your changes in your own criteria file. Loading another
+criteria file or run configuration replaces the current criteria.
+
 Validate the JSON and load the EPANET model without requiring a result file:
 
 ```powershell
