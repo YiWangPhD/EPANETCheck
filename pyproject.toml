@@ -1,0 +1,18 @@
+[project]
+name = "epanet-check"
+version = "0.1.0"
+description = "CLI and GUI-ready QA/QC checks for EPANET binary results"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pyqt6>=6.11.0",
+    "wntr>=1.5.0",
+]
+
+[project.scripts]
+epanet-check = "epanet_check.cli:main"
+epanet-check-gui = "epanet_check.gui:main"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
