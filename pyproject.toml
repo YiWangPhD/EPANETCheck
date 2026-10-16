@@ -1,6 +1,6 @@
 [project]
 name = "epanet-check"
-version = "0.1.0"
+version = "0.0.1"
 description = "CLI and GUI-ready QA/QC checks for EPANET binary results"
 readme = "README.md"
 requires-python = ">=3.13"
