@@ -88,6 +88,11 @@ const groups = {js(groups)};
 const assetField = {js(asset_column)};
 const sortField = {js(sort_column)};
 const multiSelect = {js(multi_select)};
+if (multiSelect) {{
+  stats.sort((a, b) => String(a[assetField]).localeCompare(
+    String(b[assetField]), "en", {{ numeric: true }}
+  ));
+}}
 const selected = new Set();
 const assetNames = stats.map(row => String(row[assetField]));
 const groupSelect = document.getElementById("group");
