@@ -210,20 +210,68 @@ class MainWindow(QMainWindow):
         if not filename:
             return
         try:
-            config = RunConfig.load(filename)
-            config.validate_paths(require_result=True)
-            self.output_edit.setText(str(config.output_folder))
-            self.inp_edit.setText(str(config.inp_file))
-            self.result_edit.setText(str(config.result_file))
-            self.update_asset_ids()
-            self.performance_dialog.load_path(config.performance_criteria_file)
-            self.limits_dialog.load_path(config.limits_file)
+            config_path = Path(filename).resolve()
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("Run configuration must be a JSON object.")
         except Exception as exc:
-            QMessageBox.critical(self, "Unable to load configuration", str(exc))
+            self.log(f"ERROR: Unable to load configuration: {exc}")
             return
-        self.run_config_path = Path(filename).resolve()
-        self.config_edit.setText(str(self.run_config_path))
-        self.log(f"Loaded run configuration: {self.run_config_path}")
+
+        errors = 0
+
+        def resolved_path(field: str, *, folder: bool = False) -> Path | None:
+            nonlocal errors
+            value = data.get(field)
+            try:
+                if not isinstance(value, str) or not value.strip():
+                    raise ValueError("path is empty or is not a string")
+                path = Path(value).expanduser()
+                if not path.is_absolute():
+                    path = config_path.parent / path
+                path = path.resolve()
+                if not (path.is_dir() if folder else path.is_file()):
+                    raise ValueError(f"{'Folder' if folder else 'File'} not found: {path}")
+                return path
+            except (ValueError, OSError) as exc:
+                errors += 1
+                self.log(f"ERROR: {field}: {exc} - field left empty.")
+                return None
+
+        self.performance_dialog.set_assets([], [])
+        for field, edit, folder in (
+            ("output_folder", self.output_edit, True),
+            ("inp_file", self.inp_edit, False),
+            ("result_file", self.result_edit, False),
+        ):
+            path = resolved_path(field, folder=folder)
+            edit.setText(str(path) if path else "")
+        self.update_asset_ids()
+
+        for field, dialog in (
+            ("performance_criteria_file", self.performance_dialog),
+            ("limits_file", self.limits_dialog),
+        ):
+            path = resolved_path(field)
+            if path is not None:
+                try:
+                    dialog.load_path(path)
+                    continue
+                except Exception as exc:
+                    errors += 1
+                    self.log(f"ERROR: Unable to load {field}: {exc}")
+            if field == "performance_criteria_file":
+                defaults = Path(__file__).parent / "defaults" / "performance_criteria.json"
+                dialog.set_data(json.loads(defaults.read_text(encoding="utf-8")))
+                dialog.path_label.setText("Default performance criteria (save a copy to keep edits)")
+            else:
+                dialog.set_data({"limits": {}})
+                dialog.path_label.setText("Default global limits (save a copy to keep edits)")
+            self.log(f"Using built-in defaults for {field}; file reference cleared.")
+
+        self.run_config_path = config_path
+        self.config_edit.setText(str(config_path))
+        self.log(f"Loaded run configuration: {config_path} ({errors} error(s)).")
 
     def save_run_config(self) -> None:
         if self.performance_dialog.current_path is None or self.limits_dialog.current_path is None:
@@ -241,16 +289,20 @@ class MainWindow(QMainWindow):
             path = path.with_suffix(".json")
         base = path.parent.resolve()
 
-        def relative(value: Path) -> str:
+        def relative(value: Path | str) -> str:
+            if isinstance(value, str):
+                if not value.strip():
+                    return ""
+                value = Path(value.strip())
             try:
                 return os.path.relpath(value.resolve(), base)
             except ValueError:
                 return str(value.resolve())
 
         value = {
-            "output_folder": relative(Path(self.output_edit.text().strip())),
-            "inp_file": relative(Path(self.inp_edit.text().strip())),
-            "result_file": relative(Path(self.result_edit.text().strip())),
+            "output_folder": relative(self.output_edit.text()),
+            "inp_file": relative(self.inp_edit.text()),
+            "result_file": relative(self.result_edit.text()),
             "performance_criteria_file": relative(self.performance_dialog.current_path),
             "limits_file": relative(self.limits_dialog.current_path),
             "report_name": "epanet_check_report",

@@ -27,6 +27,7 @@ def _dashboard_html(
     sort_column: str,
     y_axis_title: str,
     top_n: int = 20,
+    multi_select: bool = False,
 ) -> str:
     table = stats.copy()
     table["Group"] = table[asset_column].astype(str).map(
@@ -44,6 +45,11 @@ def _dashboard_html(
     def js(value: Any) -> str:
         return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
+    selection_controls = (
+        '<div id="tank-list" role="group" aria-label="Select tanks"></div>'
+        '<button id="all">Select all</button><button id="none">Clear all</button>'
+        if multi_select else '<select id="group"></select>'
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -57,6 +63,7 @@ h1 {{ margin-bottom: 6px; }}
 .note {{ color: #6b7280; margin-top: 0; }}
 .controls {{ display: flex; gap: 10px; margin: 20px 0; }}
 select, button {{ padding: 7px 10px; }}
+#tank-list {{ max-height: 180px; overflow: auto; display: flex; flex-wrap: wrap; gap: 10px; }}
 .table-wrap {{ max-height: 420px; overflow: auto; border: 1px solid #d1d5db; }}
 table {{ border-collapse: collapse; width: 100%; }}
 th {{ position: sticky; top: 0; background: #f3f4f6; }}
@@ -66,9 +73,9 @@ th, td {{ border-bottom: 1px solid #e5e7eb; padding: 7px; text-align: left; }}
 </head>
 <body>
 <h1>{title}</h1>
-<p class="note">Select an asset group or show the highest-ranked assets.</p>
+<p class="note">{"Select tanks to compare their statistics and levels." if multi_select else "Select an asset group or show the highest-ranked assets."}</p>
 <div class="controls">
-  <select id="group"></select>
+  {selection_controls}
   <button id="top">Show top {top_n}</button>
 </div>
 <div class="table-wrap"><table id="stats"></table></div>
@@ -80,9 +87,12 @@ const times = {js(time_values)};
 const groups = {js(groups)};
 const assetField = {js(asset_column)};
 const sortField = {js(sort_column)};
+const multiSelect = {js(multi_select)};
+const selected = new Set();
+const assetNames = stats.map(row => String(row[assetField]));
 const groupSelect = document.getElementById("group");
 
-groups.forEach(group => {{
+if (!multiSelect) groups.forEach(group => {{
   const option = document.createElement("option");
   option.value = group;
   option.textContent = group;
@@ -109,6 +119,39 @@ function drawChart(rows, chartTitle) {{
   }}, {{ responsive: true }});
 }}
 
+function showSelected() {{
+  const rows = stats.filter(row => selected.has(String(row[assetField])));
+  drawTable(rows);
+  drawChart(rows, rows.length ? "Selected tanks" : "Select one or more tanks");
+}}
+
+function setSelection(names) {{
+  selected.clear();
+  names.forEach(name => selected.add(name));
+  document.querySelectorAll("#tank-list input").forEach(box => {{
+    box.checked = selected.has(box.value);
+  }});
+  showSelected();
+}}
+
+if (multiSelect) {{
+  const list = document.getElementById("tank-list");
+  assetNames.forEach(name => {{
+    const label = document.createElement("label");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = name;
+    box.addEventListener("change", () => {{
+      if (box.checked) selected.add(name); else selected.delete(name);
+      showSelected();
+    }});
+    label.append(box, document.createTextNode(name));
+    list.appendChild(label);
+  }});
+  document.getElementById("all").addEventListener("click", () => setSelection(assetNames));
+  document.getElementById("none").addEventListener("click", () => setSelection([]));
+}}
+
 function showGroup() {{
   const group = groupSelect.value;
   const rows = stats.filter(row => row.Group === group);
@@ -118,11 +161,19 @@ function showGroup() {{
 
 document.getElementById("top").addEventListener("click", () => {{
   const rows = [...stats].sort((a, b) => Number(b[sortField]) - Number(a[sortField])).slice(0, {top_n});
+  if (multiSelect) {{
+    setSelection(rows.map(row => String(row[assetField])));
+    return;
+  }}
   drawTable(stats);
   drawChart(rows, `Top {top_n} assets by ${{sortField}}`);
 }});
-groupSelect.addEventListener("change", showGroup);
-if (groups.length) showGroup();
+if (multiSelect) {{
+  setSelection(assetNames.slice(0, 1));
+}} else {{
+  groupSelect.addEventListener("change", showGroup);
+  if (groups.length) showGroup();
+}}
 </script>
 </body>
 </html>
@@ -184,7 +235,10 @@ def export_results(
             "MaxLevel(ft)": level.max(),
             "LevelRange(ft)": level.max() - level.min(),
         })
-    tank_stats = pd.DataFrame(tank_rows)
+    tank_stats = pd.DataFrame(tank_rows, columns=[
+        "Tank", "NumCycles", "NumPeaks", "NumValleys",
+        "MinLevel(ft)", "MaxLevel(ft)", "LevelRange(ft)",
+    ])
     tank_levels.index = tank_levels.index / 3600
     tank_levels.index.name = "Time_hr"
 
@@ -259,6 +313,7 @@ def export_results(
             _dashboard_html(
                 stats, series, title=title, asset_column=asset,
                 sort_column=sort, y_axis_title=axis, top_n=top_n,
+                multi_select=(asset == "Tank"),
             ),
             encoding="utf-8",
         )
